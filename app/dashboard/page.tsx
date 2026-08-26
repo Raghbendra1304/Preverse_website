@@ -17,6 +17,14 @@ export default function DashboardPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [attempts, setAttempts] = useState<AttemptRecord[]>([]);
+  const [coins, setCoins] = useState(50);
+
+  useEffect(() => {
+    const savedCoins = window.localStorage.getItem('prepverse-coins');
+    if (savedCoins) {
+      setCoins(Math.max(0, Number(savedCoins) || 0));
+    }
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -86,7 +94,7 @@ export default function DashboardPage() {
             ) : !userEmail ? (
               <p className="mt-6 text-slate-600 dark:text-slate-300">Please sign in to view your personalized dashboard.</p>
             ) : (
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              <div className="mt-8 grid gap-4 sm:grid-cols-4">
                 <div className="rounded-3xl border border-slate-200/70 bg-slate-50 p-6 dark:border-slate-700/70 dark:bg-slate-900/80">
                   <p className="text-sm uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">Attempts</p>
                   <p className="mt-4 text-3xl font-semibold text-slate-950 dark:text-white">{totalCompleted}</p>
@@ -98,6 +106,10 @@ export default function DashboardPage() {
                 <div className="rounded-3xl border border-slate-200/70 bg-slate-50 p-6 dark:border-slate-700/70 dark:bg-slate-900/80">
                   <p className="text-sm uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">Active streak</p>
                   <p className="mt-4 text-3xl font-semibold text-slate-950 dark:text-white">{streak} days</p>
+                </div>
+                <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-900/60 dark:bg-amber-950/30">
+                  <p className="text-sm uppercase tracking-[0.25em] text-amber-700 dark:text-amber-300">Wallet</p>
+                  <p className="mt-4 text-3xl font-semibold text-amber-950 dark:text-amber-100">{coins}</p>
                 </div>
               </div>
             )}
