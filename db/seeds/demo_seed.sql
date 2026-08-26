@@ -8,7 +8,15 @@ VALUES
 ('ssc-cgl', 'SSC CGL', 'Staff Selection Commission - Combined Graduate Level Examination'),
 ('neet', 'NEET', 'National Eligibility cum Entrance Test'),
 ('jee', 'JEE', 'Joint Entrance Examination'),
-('banking', 'Banking', 'Banking and Financial Services Exams')
+('jee-main', 'JEE Main', 'National engineering entrance examination'),
+('jee-advanced', 'JEE Advanced', 'Advanced engineering entrance examination'),
+('banking', 'Banking', 'Banking and Financial Services Exams'),
+('railways', 'Railways', 'Railway recruitment examinations'),
+('defence', 'Defence', 'Defence entrance and recruitment examinations'),
+('state-psc', 'State PSC', 'State public service commission examinations'),
+('science-olympiad', 'Science Olympiad', 'School science olympiad preparation'),
+('maths-olympiad', 'Mathematics Olympiad', 'Mathematics olympiad preparation'),
+('informatics-olympiad', 'Informatics Olympiad', 'Programming and informatics olympiad preparation')
 ON CONFLICT (slug) DO NOTHING;
 
 -- Subjects for JEE and NEET example

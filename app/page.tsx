@@ -32,7 +32,7 @@ export default function Home() {
               Prepare with confidence, practice with AI, and land your next opportunity.
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-              PrepVerse combines personalized question generation, guided feedback, and progress tracking into one modern study platform for exam and interview success.
+              PrepVerse combines personalized question generation, guided feedback, and progress tracking for government exams, NEET, JEE, and olympiad preparation.
             </p>
           </div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">

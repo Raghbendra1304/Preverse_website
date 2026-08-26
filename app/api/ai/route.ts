@@ -107,8 +107,8 @@ export async function POST(request: NextRequest) {
 
   try {
     if (mode === 'generate_practice') {
-      const { topic, difficulty } = body;
-      const prompt = `Create a JSON array of four study questions for a ${difficulty} ${topic} practice quiz. Include two multiple_choice questions with options and correct answers, one coding-style prompt, and one verbal reasoning prompt. Return only valid JSON with property names: id, type, text, options, answer.`;
+      const { exam, topic, difficulty } = body;
+      const prompt = `Create a JSON array of four study questions for a ${difficulty} ${topic} practice quiz for ${exam}. Match the official syllabus and difficulty of this exam. Include two multiple_choice questions with options and correct answers, one coding-style prompt where relevant, and one reasoning prompt. Return only valid JSON with property names: id, type, text, options, answer.`;
       const text = await callGemini(prompt).catch(() => JSON.stringify(fallbackPractice(topic, difficulty)));
       let data = null;
       try {

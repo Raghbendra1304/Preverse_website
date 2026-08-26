@@ -20,8 +20,18 @@ type FeedbackResponse = {
 
 const topics = ['Algorithms', 'Data Structures', 'React', 'System Design', 'Aptitude'];
 const difficulties = ['Easy', 'Medium', 'Hard'];
+const exams = [
+  'Government Exams - UPSC, SSC, Banking, Railways, Defence, State PSC',
+  'NEET',
+  'JEE Main',
+  'JEE Advanced',
+  'Science Olympiad',
+  'Mathematics Olympiad',
+  'Informatics Olympiad',
+];
 
 export default function PracticePage() {
+  const [exam, setExam] = useState(exams[0]);
   const [topic, setTopic] = useState(topics[0]);
   const [difficulty, setDifficulty] = useState(difficulties[1]);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
@@ -61,7 +71,7 @@ export default function PracticePage() {
       const res = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'generate_practice', topic, difficulty }),
+        body: JSON.stringify({ mode: 'generate_practice', exam, topic, difficulty }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -112,6 +122,7 @@ export default function PracticePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: 'submit_feedback',
+          exam,
           topic,
           difficulty,
           questions,
@@ -208,7 +219,21 @@ export default function PracticePage() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
+          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            <label className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+              Exam
+              <select
+                value={exam}
+                onChange={(event) => setExam(event.target.value)}
+                className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-violet-400 dark:focus:ring-violet-700/30"
+              >
+                {exams.map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
             <label className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
               Topic
               <select
