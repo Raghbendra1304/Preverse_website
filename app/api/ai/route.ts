@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { appConfig } from '@/lib/config';
 
-const geminiModel = 'gemini-2.0-flash';
+const geminiModel = 'gemini-3.6-flash';
 
 async function callGemini(prompt: string) {
   if (!appConfig.geminiApiKey) {
@@ -20,7 +20,8 @@ async function callGemini(prompt: string) {
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.78,
-        maxOutputTokens: 900,
+        maxOutputTokens: 4096,
+        responseMimeType: 'application/json',
       },
     }),
   });
@@ -32,6 +33,11 @@ async function callGemini(prompt: string) {
 
   const result = await response.json();
   return result?.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text ?? '').join('') ?? '';
+}
+
+function parseJsonResponse(text: string) {
+  const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+  return JSON.parse(cleaned);
 }
 
 function fallbackPractice(topic: string, difficulty: string) {
@@ -108,11 +114,11 @@ export async function POST(request: NextRequest) {
   try {
     if (mode === 'generate_practice') {
       const { exam, topic, difficulty } = body;
-      const prompt = `Create a JSON array of four study questions for a ${difficulty} ${topic} practice quiz for ${exam}. Match the official syllabus and difficulty of this exam. Include two multiple_choice questions with options and correct answers, one coding-style prompt where relevant, and one reasoning prompt. Return only valid JSON with property names: id, type, text, options, answer.`;
+      const prompt = `Create four varied study questions for a ${difficulty} ${topic} practice quiz for ${exam}. Match the official syllabus and difficulty of this exam. Include two multiple_choice questions with options and correct answers, one coding-style prompt where relevant, and one reasoning prompt. Return only valid JSON in this exact shape: {"questions":[{"id":1,"type":"multiple_choice","text":"...","options":["..."],"answer":"..."}]}.`;
       const text = await callGemini(prompt).catch(() => JSON.stringify(fallbackPractice(topic, difficulty)));
       let data = null;
       try {
-        data = JSON.parse(text);
+        data = parseJsonResponse(text);
       } catch {
         data = fallbackPractice(topic, difficulty);
       }
@@ -125,7 +131,7 @@ export async function POST(request: NextRequest) {
       const text = await callGemini(prompt).catch(() => JSON.stringify(fallbackInterview(topic, difficulty)));
       let data = null;
       try {
-        data = JSON.parse(text);
+        data = parseJsonResponse(text);
       } catch {
         data = fallbackInterview(topic, difficulty);
       }
@@ -140,7 +146,7 @@ export async function POST(request: NextRequest) {
       let explanation = typeof text === 'string' ? text : '';
       if (explanation.startsWith('{') || explanation.startsWith('[')) {
         try {
-          const parsed = JSON.parse(text);
+          const parsed = parseJsonResponse(text);
           explanation = parsed.explanation ?? JSON.stringify(parsed);
         } catch {
           explanation = text;
@@ -156,7 +162,7 @@ export async function POST(request: NextRequest) {
       const text = await callGemini(prompt + '\n' + details).catch(() => JSON.stringify(fallbackReview(topic, difficulty, questions, answers)));
       let data;
       try {
-        data = JSON.parse(text);
+        data = parseJsonResponse(text);
       } catch {
         data = fallbackReview(topic, difficulty, questions, answers);
       }
