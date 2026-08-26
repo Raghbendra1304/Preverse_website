@@ -14,6 +14,7 @@ VALUES
 ('railways', 'Railways', 'Railway recruitment examinations'),
 ('defence', 'Defence', 'Defence entrance and recruitment examinations'),
 ('state-psc', 'State PSC', 'State public service commission examinations'),
+('olympiad', 'Olympiad', 'Mathematics, science, and informatics olympiad preparation'),
 ('science-olympiad', 'Science Olympiad', 'School science olympiad preparation'),
 ('maths-olympiad', 'Mathematics Olympiad', 'Mathematics olympiad preparation'),
 ('informatics-olympiad', 'Informatics Olympiad', 'Programming and informatics olympiad preparation')

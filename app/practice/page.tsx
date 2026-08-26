@@ -67,21 +67,17 @@ const examTracks = [
     ],
   },
   {
-    name: 'Mathematics Olympiad',
-    description: 'Problem-solving and proof preparation',
+    name: 'Olympiad',
+    description: 'Mathematics, Science, Physics, Chemistry, Biology, and Informatics Olympiads',
     subjects: [
       { name: 'Number Theory', chapters: ['Divisibility', 'Prime Numbers', 'Congruences', 'Diophantine Equations'] },
       { name: 'Geometry', chapters: ['Triangles', 'Circles', 'Transformations', 'Geometric Inequalities'] },
       { name: 'Algebra', chapters: ['Polynomials', 'Inequalities', 'Functional Equations', 'Sequences'] },
-    ],
-  },
-  {
-    name: 'Informatics Olympiad',
-    description: 'Competitive programming preparation',
-    subjects: [
-      { name: 'Algorithms', chapters: ['Sorting and Searching', 'Greedy Algorithms', 'Dynamic Programming', 'Graph Theory'] },
-      { name: 'Data Structures', chapters: ['Arrays and Strings', 'Trees', 'Heaps', 'Hashing'] },
-      { name: 'Competitive Programming', chapters: ['Complexity', 'Recursion', 'Combinatorics', 'Problem Solving'] },
+      { name: 'Science', chapters: ['Scientific Reasoning', 'Experimental Science', 'Earth Science', 'Environmental Science'] },
+      { name: 'Physics', chapters: ['Mechanics', 'Electricity and Magnetism', 'Waves and Optics', 'Modern Physics'] },
+      { name: 'Chemistry', chapters: ['Atoms and Molecules', 'Chemical Reactions', 'Organic Chemistry', 'Physical Chemistry'] },
+      { name: 'Biology', chapters: ['Cell Biology', 'Genetics', 'Human Biology', 'Ecology'] },
+      { name: 'Informatics', chapters: ['Algorithms', 'Data Structures', 'Dynamic Programming', 'Graph Theory'] },
     ],
   },
 ];
