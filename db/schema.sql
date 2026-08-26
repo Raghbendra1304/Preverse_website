@@ -140,6 +140,18 @@ CREATE TABLE IF NOT EXISTS attempts (
   created_at timestamptz DEFAULT now()
 );
 
+-- Wallet ledger: every credit or debit is auditable and immutable.
+CREATE TABLE IF NOT EXISTS coin_transactions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
+  attempt_id uuid REFERENCES attempts(id) ON DELETE SET NULL,
+  amount integer NOT NULL CHECK (amount <> 0),
+  reason text NOT NULL CHECK (reason IN ('correct_answer', 'wrong_answer', 'ad_reward', 'admin_adjustment')),
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_coin_transactions_user ON coin_transactions(user_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS answers (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   attempt_id uuid REFERENCES attempts(id) ON DELETE CASCADE,

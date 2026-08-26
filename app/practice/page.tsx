@@ -16,6 +16,7 @@ type FeedbackResponse = {
   correct: number;
   total: number;
   explanation: string;
+  results: Array<{ id: number; correct: boolean; correctAnswer: string; explanation: string }>;
 };
 
 const difficulties = ['Easy', 'Medium', 'Hard'];
@@ -97,6 +98,8 @@ export default function PracticePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(150);
+  const [coins, setCoins] = useState(50);
+  const [coinDelta, setCoinDelta] = useState<number | null>(null);
   const selectedTrack = examTracks.find((track) => track.name === exam) ?? examTracks[0];
   const selectedSubject = selectedTrack.subjects.find((item) => item.name === subject) ?? selectedTrack.subjects[0];
   const topic = `${subject}: ${chapter}`;
@@ -197,7 +200,18 @@ export default function PracticePage() {
         correct: submission.correct,
         total: submission.total,
         explanation: data.explanation ?? 'Review completed successfully.',
+        results: data.results ?? questions.map((question) => ({
+          id: question.id,
+          correct: question.type === 'multiple_choice' ? answers[question.id] === question.answer : Boolean(answers[question.id]?.trim()),
+          correctAnswer: question.answer,
+          explanation: 'Review this response against the correct answer.',
+        })),
       });
+      const earnedCoins = submission.correct * 5 - (submission.total - submission.correct) * 2;
+      const nextCoins = Math.max(0, coins + earnedCoins);
+      setCoins(nextCoins);
+      setCoinDelta(earnedCoins);
+      window.localStorage.setItem('prepverse-coins', String(nextCoins));
 
       const supabase = createBrowserSupabaseClient();
       const { data: userSession } = await supabase.auth.getSession();
@@ -223,6 +237,19 @@ export default function PracticePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    const savedCoins = window.localStorage.getItem('prepverse-coins');
+    if (savedCoins) setCoins(Math.max(0, Number(savedCoins) || 0));
+  }, []);
+
+  const watchRewardedAd = () => {
+    // Replace this demo reward with a verified ad-network callback in production.
+    const nextCoins = coins + 20;
+    setCoins(nextCoins);
+    setCoinDelta(20);
+    window.localStorage.setItem('prepverse-coins', String(nextCoins));
   };
 
   const questionContent = () => {
@@ -277,6 +304,19 @@ export default function PracticePage() {
             <div className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-200">
               Timer: {timeLeft}s
             </div>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-900/60 dark:bg-amber-950/30">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">Wallet</p>
+              <p className="mt-1 text-2xl font-semibold text-amber-950 dark:text-amber-100">{coins} coins</p>
+              {coinDelta !== null ? <p className={`text-sm ${coinDelta >= 0 ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}`}>{coinDelta >= 0 ? '+' : ''}{coinDelta} coins this test</p> : null}
+            </div>
+            {coins === 0 ? (
+              <button type="button" onClick={watchRewardedAd} className="rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-600">
+                Watch ad for 20 coins
+              </button>
+            ) : null}
           </div>
 
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
@@ -421,6 +461,17 @@ export default function PracticePage() {
               <div className="mt-6 rounded-3xl border border-slate-200/70 bg-white p-6 dark:border-slate-700/70 dark:bg-slate-950">
                 <h3 className="text-lg font-semibold text-slate-950 dark:text-white">AI feedback</h3>
                 <p className="mt-4 whitespace-pre-wrap text-slate-600 dark:text-slate-300">{feedback.explanation}</p>
+              </div>
+              <div className="mt-6 space-y-3">
+                {feedback.results.map((result, index) => (
+                  <div key={result.id} className="rounded-3xl border border-slate-200/70 bg-white p-5 dark:border-slate-700/70 dark:bg-slate-950">
+                    <p className={`font-semibold ${result.correct ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}`}>
+                      Question {index + 1}: {result.correct ? 'Correct' : 'Needs review'}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Correct answer: {result.correctAnswer}</p>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{result.explanation}</p>
+                  </div>
+                ))}
               </div>
             </div>
           ) : null}

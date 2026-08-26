@@ -100,6 +100,14 @@ function fallbackFeedback(questions: any[], answers: Record<string, string>) {
 
   return {
     explanation: `Your practice session is complete. Here are the key takeaways:\n\n${correctResponses}\n\nFor verbal and coding questions, review your answers for clarity, structure, and accurate terminology. Keep refining your approach by focusing on examples and concise explanations.`,
+    results: questions.map((question) => ({
+      id: question.id,
+      correct: question.type === 'multiple_choice' ? answers[question.id] === question.answer : Boolean(answers[question.id]?.trim()),
+      correctAnswer: question.answer,
+      explanation: question.type === 'multiple_choice'
+        ? `The correct answer is ${question.answer}. Review the underlying concept and compare it with your selected option.`
+        : 'A written response was recorded. Compare your approach with the model answer and improve its structure.',
+    })),
   };
 }
 
@@ -149,7 +157,7 @@ export async function POST(request: NextRequest) {
 
     if (mode === 'submit_feedback') {
       const { topic, difficulty, questions, answers } = body;
-      const prompt = `A user completed a ${difficulty} ${topic} practice set. Questions and answers follow. Provide a clear feedback summary that describes which multiple-choice questions were correct, plus advice on how they can improve coding and verbal responses. Return only the feedback text.`;
+      const prompt = `A user completed a ${difficulty} ${topic} practice set. Questions and answers follow. Return only valid JSON in this exact shape: {"explanation":"summary","results":[{"id":1,"correct":true,"correctAnswer":"...","explanation":"..."}]}. Include one result for every question, mark multiple-choice answers exactly, and explain each result briefly.`;
       const details = `Questions: ${JSON.stringify(questions)}\nAnswers: ${JSON.stringify(answers)}`;
       const text = await callGemini(prompt + '\n' + details).catch(() => JSON.stringify(fallbackFeedback(questions, answers)));
       let explanation = typeof text === 'string' ? text : '';
@@ -161,7 +169,15 @@ export async function POST(request: NextRequest) {
           explanation = text;
         }
       }
-      return NextResponse.json({ explanation });
+      let results = [];
+      try {
+        const parsed = parseJsonResponse(text);
+        explanation = parsed.explanation ?? explanation;
+        results = parsed.results ?? [];
+      } catch {
+        results = fallbackFeedback(questions, answers).results;
+      }
+      return NextResponse.json({ explanation, results });
     }
 
     if (mode === 'interview_review') {
