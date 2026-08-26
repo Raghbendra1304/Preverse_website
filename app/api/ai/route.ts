@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { appConfig } from '@/lib/config';
 
 const geminiModel = 'gemini-3.6-flash';
@@ -136,6 +137,16 @@ function fallbackReview(topic: string, difficulty: string, questions: any[], ans
 }
 
 export async function POST(request: NextRequest) {
+  const accessToken = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
+  if (!accessToken || !appConfig.supabaseUrl || !appConfig.supabaseAnonKey) {
+    return NextResponse.json({ error: 'You must be signed in to take a test.' }, { status: 401 });
+  }
+  const supabase = createClient(appConfig.supabaseUrl, appConfig.supabaseAnonKey);
+  const { data: userData, error: authError } = await supabase.auth.getUser(accessToken);
+  if (authError || !userData.user) {
+    return NextResponse.json({ error: 'Your sign-in session is invalid or expired.' }, { status: 401 });
+  }
+
   const body = await request.json();
   const mode = body?.mode;
 

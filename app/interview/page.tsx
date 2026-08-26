@@ -28,6 +28,8 @@ export default function InterviewPage() {
   const [review, setReview] = useState<InterviewReview | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     if (questions.length && currentIndex < questions.length) {
@@ -35,9 +37,23 @@ export default function InterviewPage() {
     }
   }, [currentIndex, questions, answers]);
 
+  useEffect(() => {
+    async function checkAuth() {
+      const supabase = createBrowserSupabaseClient();
+      const { data } = await supabase.auth.getSession();
+      setSignedIn(Boolean(data.session?.user));
+      setAuthChecked(true);
+    }
+    void checkAuth();
+  }, []);
+
   const currentQuestion = questions[currentIndex];
 
   const handleGenerate = async () => {
+    if (!signedIn) {
+      window.location.href = '/signin?next=/interview';
+      return;
+    }
     setLoading(true);
     setError(null);
     setReview(null);
@@ -46,9 +62,11 @@ export default function InterviewPage() {
     setAnswer('');
 
     try {
+      const authClient = createBrowserSupabaseClient();
+      const { data: sessionData } = await authClient.auth.getSession();
       const res = await fetch('/api/ai', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token ?? ''}` },
         body: JSON.stringify({ mode: 'generate_interview', topic, difficulty }),
       });
       const data = await res.json();
@@ -87,9 +105,11 @@ export default function InterviewPage() {
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: answer }));
 
     try {
+      const authClient = createBrowserSupabaseClient();
+      const { data: sessionData } = await authClient.auth.getSession();
       const response = await fetch('/api/ai', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token ?? ''}` },
         body: JSON.stringify({
           mode: 'interview_review',
           topic,
@@ -181,10 +201,11 @@ export default function InterviewPage() {
           </div>
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
+            {!authChecked ? <p className="rounded-lg bg-[#f7d8c8] px-4 py-3 text-sm font-semibold text-[#202b2a]">Checking your account...</p> : !signedIn ? <p className="rounded-lg bg-[#f7d8c8] px-4 py-3 text-sm font-semibold text-[#202b2a]">Sign in to take an interview.</p> : null}
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={loading}
+              disabled={loading || !authChecked}
               className="rounded-full bg-violet-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? 'Preparing questions…' : 'Start mock interview'}

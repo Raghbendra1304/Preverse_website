@@ -98,6 +98,8 @@ export default function PracticePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(150);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
   const [coins, setCoins] = useState(50);
   const [coinDelta, setCoinDelta] = useState<number | null>(null);
   const selectedTrack = examTracks.find((track) => track.name === exam) ?? examTracks[0];
@@ -121,18 +123,34 @@ export default function PracticePage() {
     return () => clearInterval(timer);
   }, [questions, feedback]);
 
+  useEffect(() => {
+    async function checkAuth() {
+      const supabase = createBrowserSupabaseClient();
+      const { data } = await supabase.auth.getSession();
+      setSignedIn(Boolean(data.session?.user));
+      setAuthChecked(true);
+    }
+    void checkAuth();
+  }, []);
+
   const currentQuestion = questions[activeIndex];
   const progress = questions.length ? Math.round(((activeIndex + 1) / questions.length) * 100) : 0;
 
   const handleGenerate = async () => {
+    if (!signedIn) {
+      window.location.href = '/signin?next=/practice';
+      return;
+    }
     setLoading(true);
     setError(null);
     setFeedback(null);
     setTimeLeft(150);
     try {
+      const authClient = createBrowserSupabaseClient();
+      const { data: sessionData } = await authClient.auth.getSession();
       const res = await fetch('/api/ai', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token ?? ''}` },
         body: JSON.stringify({ mode: 'generate_practice', exam, topic, difficulty }),
       });
       const data = await res.json();
@@ -179,9 +197,11 @@ export default function PracticePage() {
     const submission = computeScore();
 
     try {
+      const authClient = createBrowserSupabaseClient();
+      const { data: sessionData } = await authClient.auth.getSession();
       const response = await fetch('/api/ai', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token ?? ''}` },
         body: JSON.stringify({
           mode: 'submit_feedback',
           exam,
@@ -391,10 +411,11 @@ export default function PracticePage() {
           </div> : null}
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
+            {!authChecked ? <p className="rounded-lg bg-[#f7d8c8] px-4 py-3 text-sm font-semibold text-[#202b2a]">Checking your account...</p> : !signedIn ? <p className="rounded-lg bg-[#f7d8c8] px-4 py-3 text-sm font-semibold text-[#202b2a]">Sign in to take a test.</p> : null}
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={loading}
+              disabled={loading || !authChecked}
               className="rounded-full bg-violet-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? 'Generating questions…' : 'Generate practice set'}
