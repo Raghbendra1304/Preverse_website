@@ -19,64 +19,42 @@ const features = [
   },
 ];
 
+const tracks = [
+  { label: 'Government exams', detail: 'UPSC, PCS, SSC, Banking, Railways', tone: 'bg-[#dbead5]' },
+  { label: 'NEET', detail: 'Physics, Chemistry, Biology', tone: 'bg-[#f7d8c8]' },
+  { label: 'JEE', detail: 'Main and Advanced preparation', tone: 'bg-[#d9e5ec]' },
+  { label: 'Olympiads', detail: 'Maths, Science, Informatics', tone: 'bg-[#eee2b8]' },
+];
+
 export default function Home() {
   return (
-    <section className="container mx-auto py-16 sm:py-24">
-      <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+    <section className="container mx-auto py-10 sm:py-16">
+      <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
         <div className="space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-4 py-2 text-sm font-semibold text-violet-700 dark:bg-violet-900/30 dark:text-violet-200">
-            AI-powered learning for exams and interviews
-          </div>
-          <div className="space-y-6">
-            <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-5xl">
-              Prepare with confidence, practice with AI, and land your next opportunity.
-            </h1>
-            <p className="max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-              PrepVerse combines personalized question generation, guided feedback, and progress tracking for government exams, NEET, JEE, and olympiad preparation.
-            </p>
-          </div>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <Link href="/signup" className="inline-flex items-center justify-center rounded-full bg-violet-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-violet-500">
-              Start preparing
-            </Link>
-            <Link href="/signin" className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white/90 px-6 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/90 dark:text-white">
-              Sign in
-            </Link>
+          <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#de754d]">Your daily preparation desk</p>
+          <h1 className="display-font max-w-3xl text-5xl leading-[1.02] text-[#202b2a] dark:text-[#edf2e9] sm:text-7xl">Small sessions.<br /><span className="text-[#3e786b]">Serious progress.</span></h1>
+          <p className="max-w-xl text-lg leading-8 text-[#5c6965] dark:text-[#afbeb4]">One calm place to prepare for government exams, NEET, JEE, and olympiads with focused tests, instant feedback, and a record of every step forward.</p>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/practice" className="inline-flex items-center justify-center rounded-lg bg-[#202b2a] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#3e786b]">Start a practice test <span className="ml-3">→</span></Link>
+            <Link href="/signup" className="inline-flex items-center justify-center rounded-lg border border-[#202b2a]/20 px-6 py-3 text-sm font-bold text-[#202b2a] transition hover:border-[#de754d] dark:border-[#edf2e9]/20 dark:text-[#edf2e9]">Create account</Link>
           </div>
         </div>
-
-        <div className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-8 shadow-glow backdrop-blur dark:border-slate-700/80 dark:bg-slate-900/90">
-          <div className="space-y-6">
-            <div className="rounded-3xl bg-slate-950 p-6 text-white shadow-lg dark:bg-slate-800">
-              <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Launch your growth plan</p>
-              <h2 className="mt-4 text-3xl font-semibold">Interactive practice, real-time review.</h2>
-              <p className="mt-3 text-slate-300">From timed quizzes to mock interviews, PrepVerse helps you focus where improvement matters most.</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {features.map((feature) => (
-                <article key={feature.title} className="rounded-3xl border border-slate-200/70 bg-slate-50 p-5 shadow-sm dark:border-slate-700/70 dark:bg-slate-950/80">
-                  <h3 className="text-base font-semibold text-slate-950 dark:text-white">{feature.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{feature.description}</p>
-                </article>
-              ))}
-            </div>
+        <div className="relative overflow-hidden rounded-[1.75rem] bg-[#202b2a] p-7 text-[#edf2e9] shadow-[0_24px_70px_-30px_rgba(32,43,42,0.8)] sm:p-9">
+          <div className="absolute -right-14 -top-14 h-40 w-40 rounded-full border-[18px] border-[#de754d]/50" />
+          <p className="relative text-xs font-bold uppercase tracking-[0.25em] text-[#b8d1b2]">Today&apos;s focus</p>
+          <h2 className="display-font relative mt-5 max-w-sm text-4xl leading-tight">Choose a track. We&apos;ll bring the challenge.</h2>
+          <div className="relative mt-10 grid gap-3 sm:grid-cols-2">
+            {tracks.map((track) => <div key={track.label} className={`${track.tone} rounded-xl p-4 text-[#202b2a]`}><p className="font-bold">{track.label}</p><p className="mt-1 text-xs opacity-75">{track.detail}</p></div>)}
           </div>
         </div>
       </div>
-
-      <div className="mt-16 grid gap-6 rounded-[2rem] border border-slate-200/70 bg-slate-50 p-8 text-slate-900 shadow-sm dark:border-slate-700/70 dark:bg-slate-950/80 dark:text-slate-100 sm:grid-cols-3">
-        <div>
-          <p className="text-3xl font-semibold">20+</p>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Question sets and mock interview experiences</p>
-        </div>
-        <div>
-          <p className="text-3xl font-semibold">AI-driven feedback</p>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Understand exactly what to improve after every attempt.</p>
-        </div>
-        <div>
-          <p className="text-3xl font-semibold">Practice on demand</p>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Choose topics, difficulty, and format with an intuitive workflow.</p>
-        </div>
+      <div className="mt-14 grid gap-4 border-y border-[#202b2a]/10 py-6 dark:border-[#edf2e9]/10 sm:grid-cols-3">
+        <div><p className="text-2xl font-bold text-[#202b2a] dark:text-[#edf2e9]">01</p><p className="mt-1 text-sm text-[#5c6965] dark:text-[#afbeb4]">Pick your exam and chapter</p></div>
+        <div><p className="text-2xl font-bold text-[#202b2a] dark:text-[#edf2e9]">02</p><p className="mt-1 text-sm text-[#5c6965] dark:text-[#afbeb4]">Take a timed Gemini test</p></div>
+        <div><p className="text-2xl font-bold text-[#202b2a] dark:text-[#edf2e9]">03</p><p className="mt-1 text-sm text-[#5c6965] dark:text-[#afbeb4]">Learn from every mistake</p></div>
+      </div>
+      <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {features.map((feature) => <article key={feature.title} className="border-l-2 border-[#de754d] pl-4"><h3 className="font-bold text-[#202b2a] dark:text-[#edf2e9]">{feature.title}</h3><p className="mt-2 text-sm leading-6 text-[#5c6965] dark:text-[#afbeb4]">{feature.description}</p></article>)}
       </div>
     </section>
   );
