@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { appConfig, hasOpenAIConfig, hasSupabaseFrontEndConfig, hasSupabaseServiceConfig } from '@/lib/config';
+import { appConfig, hasGeminiConfig, hasSupabaseFrontEndConfig, hasSupabaseServiceConfig } from '@/lib/config';
 
 export async function GET() {
   return NextResponse.json({
@@ -7,7 +7,7 @@ export async function GET() {
     config: {
       supabaseFrontendConfigured: hasSupabaseFrontEndConfig,
       supabaseServiceConfigured: hasSupabaseServiceConfig,
-      openAIConfigured: hasOpenAIConfig,
+      geminiConfigured: hasGeminiConfig,
       hasRedirectUrl: Boolean(appConfig.supabaseRedirect),
     },
     timestamp: new Date().toISOString(),

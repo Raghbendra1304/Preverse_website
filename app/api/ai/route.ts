@@ -1,33 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { appConfig } from '@/lib/config';
 
-const openApiKey = process.env.OPENAI_API_KEY;
+const geminiModel = 'gemini-2.0-flash';
 
-async function callOpenAI(prompt: string) {
-  if (!openApiKey) {
-    throw new Error('OpenAI API key is not configured.');
+async function callGemini(prompt: string) {
+  if (!appConfig.geminiApiKey) {
+    throw new Error('Gemini API key is not configured.');
   }
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${appConfig.geminiApiKey}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${openApiKey}`,
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'system', content: 'You are a helpful exam and interview coach.' }, { role: 'user', content: prompt }],
-      temperature: 0.78,
-      max_tokens: 900,
+      systemInstruction: {
+        parts: [{ text: 'You are a helpful exam and interview coach.' }],
+      },
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.78,
+        maxOutputTokens: 900,
+      },
     }),
   });
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`OpenAI request failed: ${response.status} ${errorBody}`);
+    throw new Error(`Gemini request failed: ${response.status} ${errorBody}`);
   }
 
   const result = await response.json();
-  return result?.choices?.[0]?.message?.content ?? '';
+  return result?.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text ?? '').join('') ?? '';
 }
 
 function fallbackPractice(topic: string, difficulty: string) {
@@ -105,7 +109,7 @@ export async function POST(request: NextRequest) {
     if (mode === 'generate_practice') {
       const { topic, difficulty } = body;
       const prompt = `Create a JSON array of four study questions for a ${difficulty} ${topic} practice quiz. Include two multiple_choice questions with options and correct answers, one coding-style prompt, and one verbal reasoning prompt. Return only valid JSON with property names: id, type, text, options, answer.`;
-      const text = await callOpenAI(prompt).catch(() => JSON.stringify(fallbackPractice(topic, difficulty)));
+      const text = await callGemini(prompt).catch(() => JSON.stringify(fallbackPractice(topic, difficulty)));
       let data = null;
       try {
         data = JSON.parse(text);
@@ -118,7 +122,7 @@ export async function POST(request: NextRequest) {
     if (mode === 'generate_interview') {
       const { topic, difficulty } = body;
       const prompt = `Generate a JSON array of three concise interview prompts for a ${difficulty} ${topic} mock interview. Use property names id and prompt and return only JSON.`;
-      const text = await callOpenAI(prompt).catch(() => JSON.stringify(fallbackInterview(topic, difficulty)));
+      const text = await callGemini(prompt).catch(() => JSON.stringify(fallbackInterview(topic, difficulty)));
       let data = null;
       try {
         data = JSON.parse(text);
@@ -132,7 +136,7 @@ export async function POST(request: NextRequest) {
       const { topic, difficulty, questions, answers } = body;
       const prompt = `A user completed a ${difficulty} ${topic} practice set. Questions and answers follow. Provide a clear feedback summary that describes which multiple-choice questions were correct, plus advice on how they can improve coding and verbal responses. Return only the feedback text.`;
       const details = `Questions: ${JSON.stringify(questions)}\nAnswers: ${JSON.stringify(answers)}`;
-      const text = await callOpenAI(prompt + '\n' + details).catch(() => JSON.stringify(fallbackFeedback(questions, answers)));
+      const text = await callGemini(prompt + '\n' + details).catch(() => JSON.stringify(fallbackFeedback(questions, answers)));
       let explanation = typeof text === 'string' ? text : '';
       if (explanation.startsWith('{') || explanation.startsWith('[')) {
         try {
@@ -149,7 +153,7 @@ export async function POST(request: NextRequest) {
       const { topic, difficulty, questions, answers } = body;
       const prompt = `A candidate completed a ${difficulty} ${topic} mock interview. Provide a JSON object with keys rating (1-5), summary, strengths, and improvements. Use the candidate answers and give concise advice. Return only JSON.`;
       const details = `Questions: ${JSON.stringify(questions)}\nAnswers: ${JSON.stringify(answers)}`;
-      const text = await callOpenAI(prompt + '\n' + details).catch(() => JSON.stringify(fallbackReview(topic, difficulty, questions, answers)));
+      const text = await callGemini(prompt + '\n' + details).catch(() => JSON.stringify(fallbackReview(topic, difficulty, questions, answers)));
       let data;
       try {
         data = JSON.parse(text);

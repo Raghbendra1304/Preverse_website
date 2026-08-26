@@ -35,7 +35,7 @@ Required values:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-api-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-OPENAI_API_KEY=your-openai-api-key
+GEMINI_API_KEY=your-gemini-api-key
 NEXT_PUBLIC_SUPABASE_REDIRECT=http://localhost:3000/auth/callback
 ```
 
@@ -85,7 +85,7 @@ Example production environment values:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-OPENAI_API_KEY=your-openai-api-key
+GEMINI_API_KEY=your-gemini-api-key
 NEXT_PUBLIC_SUPABASE_REDIRECT=https://your-domain.com/auth/callback
 ```
 
@@ -95,7 +95,7 @@ The app includes a runtime health endpoint at `/api/health` that reports whether
 
 ## Notes
 
-- The AI route uses OpenAI when `OPENAI_API_KEY` is configured.
+- The AI route uses Gemini when `GEMINI_API_KEY` is configured.
 - If the key is missing, the app falls back to sample content rather than crashing.
 - Auth and dashboard features require a valid Supabase project and database schema.
 - The current app is build-ready, but not fully functional until real credentials and schema are configured.
