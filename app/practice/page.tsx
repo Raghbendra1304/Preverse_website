@@ -471,7 +471,7 @@ export default function PracticePage() {
                     </p>
                     <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Your answer: {result.selectedAnswer || 'Not answered'}</p>
                     <p className="mt-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300">Correct answer: {result.correctAnswer}</p>
-                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{result.explanation}</p>
+                    {!result.correct && result.explanation ? <p className="mt-2 max-w-2xl text-sm leading-5 text-slate-600 dark:text-slate-300">{result.explanation}</p> : null}
                   </div>
                 ))}
               </div>

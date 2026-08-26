@@ -40,6 +40,20 @@ function parseJsonResponse(text: string) {
   return JSON.parse(cleaned);
 }
 
+function normalizeFeedbackResults(results: any[], questions: any[], answers: Record<string, string>) {
+  return questions.map((question) => {
+    const result = results.find((item) => item.id === question.id) ?? {};
+    const correct = question.type === 'multiple_choice' ? answers[question.id] === question.answer : Boolean(answers[question.id]?.trim());
+    return {
+      id: question.id,
+      correct,
+      selectedAnswer: answers[question.id] ?? '',
+      correctAnswer: question.answer,
+      explanation: correct ? '' : String(result.explanation ?? 'Review the concept and try this question again.').replace(/\s+/g, ' ').trim().slice(0, 240),
+    };
+  });
+}
+
 function fallbackPractice(topic: string, difficulty: string) {
   const normalizedTopic = topic.toLowerCase();
   const subjectQuestions = normalizedTopic.includes('biology') || normalizedTopic.includes('physiology')
@@ -178,9 +192,7 @@ export async function POST(request: NextRequest) {
       } catch {
         results = fallbackFeedback(questions, answers).results;
       }
-      if (!results.length) {
-        results = fallbackFeedback(questions, answers).results;
-      }
+      results = normalizeFeedbackResults(results, questions, answers);
       return NextResponse.json({ explanation, results });
     }
 
