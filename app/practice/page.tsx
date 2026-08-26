@@ -18,21 +18,48 @@ type FeedbackResponse = {
   explanation: string;
 };
 
-const topics = ['Algorithms', 'Data Structures', 'React', 'System Design', 'Aptitude'];
 const difficulties = ['Easy', 'Medium', 'Hard'];
-const exams = [
-  'Government Exams - UPSC, SSC, Banking, Railways, Defence, State PSC',
-  'NEET',
-  'JEE Main',
-  'JEE Advanced',
-  'Science Olympiad',
-  'Mathematics Olympiad',
-  'Informatics Olympiad',
+const examTracks = [
+  {
+    name: 'Government Exams',
+    description: 'UPSC, SSC, Banking, Railways, Defence, and State PSC',
+    topics: ['General Knowledge', 'Current Affairs', 'Quantitative Aptitude', 'Reasoning', 'English', 'Indian Polity'],
+  },
+  {
+    name: 'NEET',
+    description: 'Medical entrance preparation',
+    topics: ['Physics', 'Chemistry', 'Botany', 'Zoology', 'Human Physiology', 'Organic Chemistry'],
+  },
+  {
+    name: 'JEE Main',
+    description: 'Engineering entrance preparation',
+    topics: ['Physics', 'Chemistry', 'Mathematics', 'Mechanics', 'Electrodynamics', 'Calculus'],
+  },
+  {
+    name: 'JEE Advanced',
+    description: 'Advanced engineering entrance preparation',
+    topics: ['Advanced Physics', 'Advanced Chemistry', 'Advanced Mathematics', 'IIT Mechanics', 'Organic Reactions', 'Coordinate Geometry'],
+  },
+  {
+    name: 'Science Olympiad',
+    description: 'School science olympiad preparation',
+    topics: ['Physics', 'Chemistry', 'Biology', 'Earth Science', 'Scientific Reasoning', 'Experimental Science'],
+  },
+  {
+    name: 'Mathematics Olympiad',
+    description: 'Problem-solving and proof preparation',
+    topics: ['Number Theory', 'Combinatorics', 'Geometry', 'Algebra', 'Inequalities', 'Proof Writing'],
+  },
+  {
+    name: 'Informatics Olympiad',
+    description: 'Competitive programming preparation',
+    topics: ['Algorithms', 'Data Structures', 'Dynamic Programming', 'Graph Theory', 'Combinatorics', 'Competitive Programming'],
+  },
 ];
 
 export default function PracticePage() {
-  const [exam, setExam] = useState(exams[0]);
-  const [topic, setTopic] = useState(topics[0]);
+  const [exam, setExam] = useState(examTracks[0].name);
+  const [topic, setTopic] = useState(examTracks[0].topics[0]);
   const [difficulty, setDifficulty] = useState(difficulties[1]);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -41,6 +68,7 @@ export default function PracticePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(150);
+  const selectedTrack = examTracks.find((track) => track.name === exam) ?? examTracks[0];
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -213,6 +241,7 @@ export default function PracticePage() {
             <div>
               <h1 className="text-3xl font-semibold text-slate-950 dark:text-white">Practice mode</h1>
               <p className="mt-3 text-slate-600 dark:text-slate-300">Generate focused questions for the topic you want to master.</p>
+              <p className="mt-2 text-sm font-medium text-violet-700 dark:text-violet-300">{selectedTrack.description}</p>
             </div>
             <div className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-200">
               Timer: {timeLeft}s
@@ -224,12 +253,17 @@ export default function PracticePage() {
               Exam
               <select
                 value={exam}
-                onChange={(event) => setExam(event.target.value)}
+                onChange={(event) => {
+                  const nextExam = event.target.value;
+                  const nextTrack = examTracks.find((track) => track.name === nextExam) ?? examTracks[0];
+                  setExam(nextExam);
+                  setTopic(nextTrack.topics[0]);
+                }}
                 className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-violet-400 dark:focus:ring-violet-700/30"
               >
-                {exams.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
+                {examTracks.map((track) => (
+                  <option key={track.name} value={track.name}>
+                    {track.name}
                   </option>
                 ))}
               </select>
@@ -241,7 +275,7 @@ export default function PracticePage() {
                 onChange={(event) => setTopic(event.target.value)}
                 className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-violet-400 dark:focus:ring-violet-700/30"
               >
-                {topics.map((value) => (
+                {selectedTrack.topics.map((value) => (
                   <option key={value} value={value}>
                     {value}
                   </option>
