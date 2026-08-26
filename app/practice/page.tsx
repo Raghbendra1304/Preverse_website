@@ -90,6 +90,8 @@ export default function PracticePage() {
   const [exam, setExam] = useState(examTracks[0].name);
   const [subject, setSubject] = useState(examTracks[0].subjects[0].name);
   const [chapter, setChapter] = useState(examTracks[0].subjects[0].chapters[0]);
+  const [testMode, setTestMode] = useState<'practice' | 'full_mock'>('practice');
+  const [questionCount, setQuestionCount] = useState(10);
   const [difficulty, setDifficulty] = useState(difficulties[1]);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -105,6 +107,7 @@ export default function PracticePage() {
   const selectedTrack = examTracks.find((track) => track.name === exam) ?? examTracks[0];
   const selectedSubject = selectedTrack.subjects.find((item) => item.name === subject) ?? selectedTrack.subjects[0];
   const topic = `${subject}: ${chapter}`;
+  const testDuration = testMode === 'full_mock' ? 3600 : questionCount * 45;
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -144,14 +147,14 @@ export default function PracticePage() {
     setLoading(true);
     setError(null);
     setFeedback(null);
-    setTimeLeft(150);
+    setTimeLeft(testDuration);
     try {
       const authClient = createBrowserSupabaseClient();
       const { data: sessionData } = await authClient.auth.getSession();
       const res = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session?.access_token ?? ''}` },
-        body: JSON.stringify({ mode: 'generate_practice', exam, topic, difficulty }),
+        body: JSON.stringify({ mode: 'generate_practice', exam, topic, difficulty, questionCount, testMode }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -340,7 +343,7 @@ export default function PracticePage() {
             ) : null}
           </div>
 
-          {!questions.length ? <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          {!questions.length ? <div className="mt-8 grid gap-6 sm:grid-cols-5">
             <label className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
               Exam
               <select
@@ -406,6 +409,30 @@ export default function PracticePage() {
                     {value}
                   </option>
                 ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+              Test mode
+              <select
+                value={testMode}
+                onChange={(event) => setTestMode(event.target.value as 'practice' | 'full_mock')}
+                className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-violet-400 dark:focus:ring-violet-700/30"
+              >
+                <option value="practice">Topic practice</option>
+                <option value="full_mock">Full mock test</option>
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+              Questions
+              <select
+                value={questionCount}
+                onChange={(event) => setQuestionCount(Number(event.target.value))}
+                disabled={testMode === 'full_mock'}
+                className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-violet-400 dark:focus:ring-violet-700/30"
+              >
+                <option value={5}>5 questions</option>
+                <option value={10}>10 questions</option>
+                <option value={20}>20 questions</option>
               </select>
             </label>
           </div> : null}
