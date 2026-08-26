@@ -23,43 +23,72 @@ const examTracks = [
   {
     name: 'Government Exams',
     description: 'UPSC, SSC, Banking, Railways, Defence, and State PSC',
-    topics: ['General Knowledge', 'Current Affairs', 'Quantitative Aptitude', 'Reasoning', 'English', 'Indian Polity'],
+    subjects: [
+      { name: 'General Studies', chapters: ['Indian History', 'Indian Polity', 'Geography', 'Economy'] },
+      { name: 'Aptitude', chapters: ['Quantitative Aptitude', 'Logical Reasoning', 'Data Interpretation', 'English'] },
+      { name: 'Current Affairs', chapters: ['National News', 'International News', 'Science and Technology', 'Government Schemes'] },
+    ],
   },
   {
     name: 'NEET',
     description: 'Medical entrance preparation',
-    topics: ['Physics', 'Chemistry', 'Botany', 'Zoology', 'Human Physiology', 'Organic Chemistry'],
+    subjects: [
+      { name: 'Physics', chapters: ['Mechanics', 'Thermodynamics', 'Electrodynamics', 'Modern Physics'] },
+      { name: 'Chemistry', chapters: ['Physical Chemistry', 'Organic Chemistry', 'Inorganic Chemistry', 'Chemical Bonding'] },
+      { name: 'Biology', chapters: ['Cell Biology', 'Human Physiology', 'Genetics', 'Ecology'] },
+    ],
   },
   {
     name: 'JEE Main',
     description: 'Engineering entrance preparation',
-    topics: ['Physics', 'Chemistry', 'Mathematics', 'Mechanics', 'Electrodynamics', 'Calculus'],
+    subjects: [
+      { name: 'Physics', chapters: ['Mechanics', 'Electrodynamics', 'Optics', 'Modern Physics'] },
+      { name: 'Chemistry', chapters: ['Physical Chemistry', 'Organic Chemistry', 'Inorganic Chemistry', 'Coordination Compounds'] },
+      { name: 'Mathematics', chapters: ['Calculus', 'Algebra', 'Coordinate Geometry', 'Vectors and 3D'] },
+    ],
   },
   {
     name: 'JEE Advanced',
     description: 'Advanced engineering entrance preparation',
-    topics: ['Advanced Physics', 'Advanced Chemistry', 'Advanced Mathematics', 'IIT Mechanics', 'Organic Reactions', 'Coordinate Geometry'],
+    subjects: [
+      { name: 'Advanced Physics', chapters: ['Rotational Dynamics', 'Fluid Mechanics', 'Electromagnetic Induction', 'Wave Optics'] },
+      { name: 'Advanced Chemistry', chapters: ['Ionic Equilibrium', 'Organic Reactions', 'Molecular Structure', 'Electrochemistry'] },
+      { name: 'Advanced Mathematics', chapters: ['Complex Numbers', 'Advanced Calculus', 'Combinatorics', 'Conic Sections'] },
+    ],
   },
   {
     name: 'Science Olympiad',
     description: 'School science olympiad preparation',
-    topics: ['Physics', 'Chemistry', 'Biology', 'Earth Science', 'Scientific Reasoning', 'Experimental Science'],
+    subjects: [
+      { name: 'Physics', chapters: ['Motion and Forces', 'Energy', 'Electricity', 'Light and Sound'] },
+      { name: 'Chemistry', chapters: ['Matter', 'Atoms and Molecules', 'Chemical Reactions', 'Acids and Bases'] },
+      { name: 'Biology', chapters: ['Living Systems', 'Plants', 'Animals', 'Environment'] },
+    ],
   },
   {
     name: 'Mathematics Olympiad',
     description: 'Problem-solving and proof preparation',
-    topics: ['Number Theory', 'Combinatorics', 'Geometry', 'Algebra', 'Inequalities', 'Proof Writing'],
+    subjects: [
+      { name: 'Number Theory', chapters: ['Divisibility', 'Prime Numbers', 'Congruences', 'Diophantine Equations'] },
+      { name: 'Geometry', chapters: ['Triangles', 'Circles', 'Transformations', 'Geometric Inequalities'] },
+      { name: 'Algebra', chapters: ['Polynomials', 'Inequalities', 'Functional Equations', 'Sequences'] },
+    ],
   },
   {
     name: 'Informatics Olympiad',
     description: 'Competitive programming preparation',
-    topics: ['Algorithms', 'Data Structures', 'Dynamic Programming', 'Graph Theory', 'Combinatorics', 'Competitive Programming'],
+    subjects: [
+      { name: 'Algorithms', chapters: ['Sorting and Searching', 'Greedy Algorithms', 'Dynamic Programming', 'Graph Theory'] },
+      { name: 'Data Structures', chapters: ['Arrays and Strings', 'Trees', 'Heaps', 'Hashing'] },
+      { name: 'Competitive Programming', chapters: ['Complexity', 'Recursion', 'Combinatorics', 'Problem Solving'] },
+    ],
   },
 ];
 
 export default function PracticePage() {
   const [exam, setExam] = useState(examTracks[0].name);
-  const [topic, setTopic] = useState(examTracks[0].topics[0]);
+  const [subject, setSubject] = useState(examTracks[0].subjects[0].name);
+  const [chapter, setChapter] = useState(examTracks[0].subjects[0].chapters[0]);
   const [difficulty, setDifficulty] = useState(difficulties[1]);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -69,6 +98,8 @@ export default function PracticePage() {
   const [error, setError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(150);
   const selectedTrack = examTracks.find((track) => track.name === exam) ?? examTracks[0];
+  const selectedSubject = selectedTrack.subjects.find((item) => item.name === subject) ?? selectedTrack.subjects[0];
+  const topic = `${subject}: ${chapter}`;
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -257,7 +288,8 @@ export default function PracticePage() {
                   const nextExam = event.target.value;
                   const nextTrack = examTracks.find((track) => track.name === nextExam) ?? examTracks[0];
                   setExam(nextExam);
-                  setTopic(nextTrack.topics[0]);
+                  setSubject(nextTrack.subjects[0].name);
+                  setChapter(nextTrack.subjects[0].chapters[0]);
                 }}
                 className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-violet-400 dark:focus:ring-violet-700/30"
               >
@@ -269,13 +301,32 @@ export default function PracticePage() {
               </select>
             </label>
             <label className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
-              Topic
+              Subject
               <select
-                value={topic}
-                onChange={(event) => setTopic(event.target.value)}
+                value={subject}
+                onChange={(event) => {
+                  const nextSubject = event.target.value;
+                  const nextSubjectData = selectedTrack.subjects.find((item) => item.name === nextSubject) ?? selectedTrack.subjects[0];
+                  setSubject(nextSubject);
+                  setChapter(nextSubjectData.chapters[0]);
+                }}
                 className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-violet-400 dark:focus:ring-violet-700/30"
               >
-                {selectedTrack.topics.map((value) => (
+                {selectedTrack.subjects.map((item) => (
+                  <option key={item.name} value={item.name}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+              Chapter
+              <select
+                value={chapter}
+                onChange={(event) => setChapter(event.target.value)}
+                className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-violet-400 dark:focus:ring-violet-700/30"
+              >
+                {selectedSubject.chapters.map((value) => (
                   <option key={value} value={value}>
                     {value}
                   </option>
