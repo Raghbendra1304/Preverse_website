@@ -103,6 +103,7 @@ function fallbackFeedback(questions: any[], answers: Record<string, string>) {
     results: questions.map((question) => ({
       id: question.id,
       correct: question.type === 'multiple_choice' ? answers[question.id] === question.answer : Boolean(answers[question.id]?.trim()),
+      selectedAnswer: answers[question.id] ?? '',
       correctAnswer: question.answer,
       explanation: question.type === 'multiple_choice'
         ? `The correct answer is ${question.answer}. Review the underlying concept and compare it with your selected option.`
@@ -175,6 +176,9 @@ export async function POST(request: NextRequest) {
         explanation = parsed.explanation ?? explanation;
         results = parsed.results ?? [];
       } catch {
+        results = fallbackFeedback(questions, answers).results;
+      }
+      if (!results.length) {
         results = fallbackFeedback(questions, answers).results;
       }
       return NextResponse.json({ explanation, results });

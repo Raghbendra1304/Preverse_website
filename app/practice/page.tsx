@@ -16,7 +16,7 @@ type FeedbackResponse = {
   correct: number;
   total: number;
   explanation: string;
-  results: Array<{ id: number; correct: boolean; correctAnswer: string; explanation: string }>;
+  results: Array<{ id: number; correct: boolean; selectedAnswer: string; correctAnswer: string; explanation: string }>;
 };
 
 const difficulties = ['Easy', 'Medium', 'Hard'];
@@ -203,6 +203,7 @@ export default function PracticePage() {
         results: data.results ?? questions.map((question) => ({
           id: question.id,
           correct: question.type === 'multiple_choice' ? answers[question.id] === question.answer : Boolean(answers[question.id]?.trim()),
+          selectedAnswer: answers[question.id] ?? '',
           correctAnswer: question.answer,
           explanation: 'Review this response against the correct answer.',
         })),
@@ -319,7 +320,7 @@ export default function PracticePage() {
             ) : null}
           </div>
 
-          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          {!questions.length ? <div className="mt-8 grid gap-6 sm:grid-cols-3">
             <label className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
               Exam
               <select
@@ -387,7 +388,7 @@ export default function PracticePage() {
                 ))}
               </select>
             </label>
-          </div>
+          </div> : null}
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <button
@@ -464,11 +465,12 @@ export default function PracticePage() {
               </div>
               <div className="mt-6 space-y-3">
                 {feedback.results.map((result, index) => (
-                  <div key={result.id} className="rounded-3xl border border-slate-200/70 bg-white p-5 dark:border-slate-700/70 dark:bg-slate-950">
+                  <div key={result.id} className={`rounded-3xl border p-5 ${result.correct ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30' : 'border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950/30'}`}>
                     <p className={`font-semibold ${result.correct ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}`}>
-                      Question {index + 1}: {result.correct ? 'Correct' : 'Needs review'}
+                      Question {index + 1}: {result.correct ? 'Correct answer' : 'Wrong answer'}
                     </p>
-                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Correct answer: {result.correctAnswer}</p>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Your answer: {result.selectedAnswer || 'Not answered'}</p>
+                    <p className="mt-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300">Correct answer: {result.correctAnswer}</p>
                     <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{result.explanation}</p>
                   </div>
                 ))}
